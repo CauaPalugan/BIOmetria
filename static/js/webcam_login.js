@@ -1,5 +1,3 @@
-// static/js/webcam_login.js
-
 const video = document.getElementById('videoElement');
 const canvas = document.getElementById('canvas');
 const captureBtn = document.getElementById('captureBtn');
