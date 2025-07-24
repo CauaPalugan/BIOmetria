@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard MyStock - Meio Ambiente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}"> <style>
+        body { padding-top: 56px; } /* Ajuste para a navbar fixa */
+        .card { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">MyStock Meio Ambiente</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'monitoramento_basico' %}">Monitoramento Básico</a>
+                    </li>
+                    {% if user.is_authenticated and user.perfilusuario.cargo in 'analista,coordenador' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'analise_detalhada' %}">Análise Detalhada</a>
+                    </li>
+                    {% endif %}
+                    {% if user.is_authenticated and user.perfilusuario.cargo == 'coordenador' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'gerenciamento_projetos' %}">Gerenciamento de Projetos</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Olá, {{ user.perfilusuario.name }} ({{ user.perfilusuario.cargo|capfirst }}) </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Sair</a></li> </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">Dashboard Geral - Visão Ambiental</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Notícias Ambientais Recentes</h5>
+                        <p class="card-text">
+                            Aumento de 5% na área de floresta protegida no último trimestre. Iniciativas de reciclagem em alta.
+                        </p>
+                        <a href="{% url 'monitoramento_basico' %}" class="btn btn-primary">Ver Monitoramento Básico</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Alertas e Informações Gerais</h5>
+                        <p class="card-text">
+                            Lembrete: Novo regulamento de descarte de resíduos entra em vigor em 01/08. Após isso o baguio vai ser
+                            louco
+                        </p>
+                        {% if user.is_authenticated and user.perfilusuario.cargo in 'analista,coordenador' %}
+                        <a href="{% url 'analise_detalhada' %}" class="btn btn-secondary">Ir para Análise Detalhada</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
