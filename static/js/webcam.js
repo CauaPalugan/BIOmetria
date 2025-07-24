@@ -4,7 +4,7 @@ const captureBtn = document.getElementById('captureBtn');
 const capturedImage = document.getElementById('capturedImage');
 const imagemBase64Input = document.getElementById('imagemBase64Input');
 const cadastroForm = document.getElementById('cadastroForm');
-const messageDiv = document.getElementById('message'); // Div onde as mensagens serão exibidas
+const messageDiv = document.getElementById('message');
 
 // Pedir permissão para acessar a webcam
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -15,7 +15,7 @@ navigator.mediaDevices.getUserMedia({ video: true })
     .catch(function(err) {
         console.error("Erro ao acessar a webcam: " + err);
         messageDiv.textContent = "Erro ao acessar a webcam. Por favor, verifique as permissões.";
-        messageDiv.classList.add('text-danger'); // Usa classe do Bootstrap para erro
+        messageDiv.classList.add('text-danger');
     });
 
 captureBtn.addEventListener('click', function() {
@@ -36,13 +36,10 @@ captureBtn.addEventListener('click', function() {
 });
 
 cadastroForm.addEventListener('submit', function(event) {
-    event.preventDefault(); // Impedir o envio padrão do formulário
-
-    // A biometria é opcional, então não precisa verificar imagemBase64Input.value aqui.
-    // A validação de campos obrigatórios será feita no backend.
+    event.preventDefault(); 
 
     messageDiv.textContent = "Enviando dados...";
-    messageDiv.classList.remove('text-success', 'text-danger'); // Limpa classes anteriores
+    messageDiv.classList.remove('text-success', 'text-danger'); 
 
     const formData = new FormData(cadastroForm);
     // FormData automaticamente pega os valores dos inputs do formulário
@@ -52,27 +49,23 @@ cadastroForm.addEventListener('submit', function(event) {
         body: formData,
     })
     .then(response => {
-        // Verifica se a resposta é JSON antes de tentar parsing
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
             return response.json();
         } else {
-            // Se não for JSON, algo inesperado aconteceu no backend (ex: erro 500 sem JSON)
             throw new Error('Resposta não é JSON. Verifique o console do servidor Django.');
         }
     })
     .then(data => {
-        messageDiv.textContent = data.message; // Exibe a mensagem do backend
+        messageDiv.textContent = data.message; 
         if (data.status === 'success') {
-            messageDiv.classList.add('text-success'); // Adiciona classe Bootstrap de sucesso
+            messageDiv.classList.add('text-success');
             console.log("Sucesso:", data);
-            // Você pode redirecionar ou limpar o formulário aqui
-            // window.location.href = '/cadastros/validacao/';
-            cadastroForm.reset(); // Limpa o formulário após o sucesso
-            capturedImage.style.display = 'none'; // Esconde a imagem capturada
-            imagemBase64Input.value = ''; // Limpa o input hidden
+            cadastroForm.reset(); 
+            capturedImage.style.display = 'none'; 
+            imagemBase64Input.value = ''; 
         } else {
-            messageDiv.classList.add('text-danger'); // Adiciona classe Bootstrap de erro
+            messageDiv.classList.add('text-danger'); 
             console.error("Erro:", data);
         }
     })

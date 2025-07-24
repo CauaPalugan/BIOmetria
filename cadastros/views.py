@@ -2,14 +2,14 @@ import base64
 import numpy as np
 import cv2
 import os
-from django.shortcuts import render, redirect # redirect não será mais usado em POST
+from django.shortcuts import render, redirect 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from .models import PerfilUsuario
 from django.conf import settings
-from django.contrib.auth import login, logout # Importa logout
-from django.contrib.auth.decorators import login_required # Decorador para exigir login
+from django.contrib.auth import login, logout 
+from django.contrib.auth.decorators import login_required 
 
 
 # --- VARIÁVEIS PARA CARREGAR OS MODELOS DO OPENCV ---
@@ -41,7 +41,7 @@ def check_cargo_permission(user, required_roles):
         user_cargo = user.perfilusuario.cargo
         return user_cargo in required_roles
     except PerfilUsuario.DoesNotExist:
-        return False # Se não tiver perfil associado, não tem permissão
+        return False
 
 @csrf_exempt
 def cadastrar_biometria(request):
@@ -68,7 +68,7 @@ def cadastrar_biometria(request):
         if User.objects.filter(username=username).exists():
             return JsonResponse({'status': 'error', 'message': 'Nome de usuário já existe.'})
 
-        face_encoding = None # Inicializa como None, será preenchido se a biometria for enviada
+        face_encoding = None 
 
         # Processamento da biometria apenas se uma imagem foi enviada
         if imagem_base64:
@@ -118,14 +118,14 @@ def cadastrar_biometria(request):
                 print(f"Erro ao processar imagem biométrica: {e}")
                 return JsonResponse({'status': 'error', 'message': f'Erro ao processar a imagem biométrica: {str(e)}'})
 
-        # Se chegou até aqui, os dados básicos são válidos e a biometria foi processada ou é opcional
+        # Se chegou até aqui, os dados básicos são válidos e a biometria foi processada
         try:
             user = User.objects.create_user(username=username, password=password)
             PerfilUsuario.objects.create(
                 usuario=user,
                 name=name,
                 cargo=cargo,
-                dados_biometricos=face_encoding # Pode ser None se a biometria não foi enviada
+                dados_biometricos=face_encoding
             )
 
             print("Usuário, biometria, nome e cargo cadastrados com sucesso!")
@@ -135,11 +135,10 @@ def cadastrar_biometria(request):
             print(f"Erro ao salvar usuário no banco de dados: {e}")
             return JsonResponse({'status': 'error', 'message': f'Erro interno ao cadastrar usuário: {str(e)}'})
 
-    # Para requisições GET, simplesmente renderiza o formulário
     return render(request, 'cadastro.html')
 
 @csrf_exempt
-def validar_biometria(request): # Esta é a view de login
+def validar_biometria(request):
     if request.method == 'POST':
         imagem_base64 = request.POST.get('imagem_base64')
 
@@ -211,24 +210,20 @@ def validar_biometria(request): # Esta é a view de login
 
         except Exception as e:
             print(f"Erro no processo de validação biométrica: {e}")
-            # print(traceback.format_exc()) # Para depuração mais profunda
             return JsonResponse({'status': 'error', 'message': f'Erro interno no servidor: {str(e)}'})
 
     return render(request, 'validacao.html')
 
-@login_required(login_url='/cadastros/validacao/') # Redireciona para a tela de login se não estiver logado
+@login_required(login_url='/cadastros/validacao/') 
 def dashboard_view(request):
-    # Essa tela é para todos os usuários logados
     return render(request, 'dashboard.html')
 
 @login_required(login_url='/cadastros/validacao/')
 def monitoramento_basico_view(request):
-    # Essa tela é para todos os usuários logados
     return render(request, 'monitoramento_basico.html')
 
 @login_required(login_url='/cadastros/validacao/')
 def analise_detalhada_view(request):
-    # Apenas Analistas e Coordenadores podem acessar
     if check_cargo_permission(request.user, ['analista', 'coordenador']):
         return render(request, 'analise_detalhada.html')
     else:
@@ -236,13 +231,12 @@ def analise_detalhada_view(request):
 
 @login_required(login_url='/cadastros/validacao/')
 def gerenciamento_projetos_view(request):
-    # Apenas Coordenadores podem acessar
     if check_cargo_permission(request.user, ['coordenador']):
         return render(request, 'gerenciamento_projetos.html')
     else:
         return HttpResponse("Acesso Negado: Esta página é exclusiva para Coordenadores.", status=403)
 
-@login_required(login_url='/cadastros/validacao/') # Redireciona para o login se não estiver logado
+@login_required(login_url='/cadastros/validacao/') 
 def user_logout(request):
     logout(request)
-    return redirect('validar_biometria') # Redireciona para a tela de login após o logout
+    return redirect('validar_biometria') 
